@@ -7,6 +7,14 @@ class Event:
         self.end_time = end
         self.givenType = boolType
 
+class Tasks:
+    def __init__(self, name, hoursToComplete, dueDate, priority):
+        self.name = name
+        self.hoursToComplete = hoursToComplete
+        self.dueDate = dueDate
+        self.priority = priority
+        self.calcPriority = 0;
+
 
 
 

@@ -6,10 +6,8 @@
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 </head>
 <body style="background-color: #DEF5FB">
-	{ % if test % }
 	<h1 style="text-align: center;">UVA Hackathon Scheduler</h1>
 	<h4 style="text-align: center;">Austin Bae, Omar El Sheik, Collin Hansen</h4>
-	{ % endif % }
 	<br>
 	<div id="wrapper" class="active">
       
@@ -24,8 +22,9 @@
            <li class="sidebar-brand"><a id="menu-toggle" href="#">Menu<span id="main_icon" class="glyphicon glyphicon-align-justify"></span></a></li>
       </ul>
         <ul class="sidebar-nav" id="sidebar">     
-          <li><a>Link1<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
-          <li><a>link2<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
+          <li><a>Enter Event<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
+          <li><a>Enter Assignment<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
+          <li><a>Emergency!<span class="sub_icon glyphicon glyphicon-link"></span></a></li>
         </ul>
       </div>
           
@@ -36,27 +35,37 @@
           <div class="row">
               <div class="col-md-10">
 					<div class="row">
-						{ % for db in dbs % }
-						<table class="table table-bordered" style="col-md-3">
-							<tr style="background-color: #BAFFC9">
-								<th style="text-align: center; padding: 0px;">
-									<table style="width: 60%; left: 20%; position: relative;">
-										<tr>
-											<td rowspan=2 style="font-size: 50px; padding-right: 5px;"></td>
-											<td style="padding-left: 5px;">March</td>
-										</tr>
-										<tr><td>MONDAY</td></tr>
-									</table>
-								</th>
-							</tr>
-							<tr>
-								<td>8am</td>
-							</tr>
-							<tr>
-								<td>9am</td>
-							</tr>
-						</table>
-						{ % endfor % }
+						{% for db in dbs %}
+						<div class="col-md-3" style="padding: 0px;">
+							<table class="table table-bordered" style="width: 100%;">
+								<tr style="background-color: #BAFFC9">
+									<th style="text-align: center; padding: 0px;">
+										<table style="width: 60%; left: 20%; position: relative;">
+											<tr>
+												<td rowspan=2 style="font-size: 50px; padding-right: 5px;">{{db.day}}</td>
+												<td style="padding-left: 5px;">{{db.Month}}</td>
+											</tr>
+											<tr><td>{{db.Week}}</td></tr>
+										</table>
+									</th>
+								</tr>
+								{% for time in times %}
+								<tr>
+									{% if time.time == db.Data.start %}
+										{% if db.Data.type %}
+										<td style="background-color: red">{{db.Data.start}} | {{db.Data.event}}</td>
+										{% else %}
+										<td style="background-color: blue">{{db.Data.start}} | {{db.Data.event}}</td>
+										{% endif %}
+									{% else %}
+									<td>{{time.time}}</td>	
+									{% endif %}
+					
+								</tr>
+								{% endfor %}
+							</table>
+						</div>
+						{% endfor %}
 					</div>
 				</div>
             </div>
