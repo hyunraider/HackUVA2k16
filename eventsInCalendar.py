@@ -44,33 +44,31 @@ def sort_events():
 def free_Time_Until(dueDate):
     currentDate = datetime.datetime.now(pytz.utc)
     totalTime =  dueDate - currentDate
+    print totalTime
     i = 0
+    if len(eventList) > 1 and eventList[0].start_time - currentDate > datetime.timedelta(minutes=45):
+        totalTime = totalTime - datetime.timedelta(minutes=15)
+    else:
+        totalTime = totalTime - (eventList[0].start_time - currentDate)
+
     while i < len(eventList)-2 and dueDate > eventList[i].end_time:
-        print totalTime
+
         if eventList[i+1].start_time > dueDate:
-            if  dueDate - eventList[i].end_time <= datetime.timedelta(minutes=30):
+            if  dueDate - eventList[i].end_time < datetime.timedelta(minutes=60):
                 totalTime = totalTime - (dueDate - eventList[i].end_time)
-                print dueDate - eventList[i].end_time
             else:
                 totalTime = totalTime - datetime.timedelta(minutes=30)
-                print 30
         else:
-            if eventList[i+1].start_time - eventList[i].end_time <= datetime.timedelta(minutes=30):
+            if eventList[i+1].start_time - eventList[i].end_time < datetime.timedelta(minutes=60):
                 totalTime = totalTime - (eventList[i+1].start_time - eventList[i].end_time)
-                print (eventList[i+1].start_time - eventList[i].end_time)
             else:
                 totalTime = totalTime - datetime.timedelta(minutes=30)
-                print  30
         totalTime = totalTime - (eventList[i].end_time - eventList[i].start_time)
-        print (eventList[i].end_time - eventList[i].start_time)
         i+=1
         if eventList[i].start_time < dueDate and eventList[i].end_time > dueDate:
             totalTime = totalTime - (dueDate - eventList[i].start_time)
-            print dueDate - eventList[i].start_time
-                                     
+        print totalTime
     return totalTime #turn this into an int?? calc an int the whole time??
-
-
 
 def calculate_Priority():
     for task in taskList:
