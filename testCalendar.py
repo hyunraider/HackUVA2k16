@@ -60,8 +60,20 @@ def add_Sleep():                                                                
     currentDay = eventList[0].start_time
     nextDayIndex = 0
     for i in range(0, 6):
-        lastMomentInDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 5
+        lastMomentInDay = eastern.localize(datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 59)+datetime.timedelta(hours =-4))
+        firstMomentInDay = eastern.localize(datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 0, 0)+datetime.timedelta(hours=-4))
+        for n in range(0,len(eventList)-1):
+            if eventList[n].end_time > firstMomentInDay:
+                firstEventTimeInDay = eventList[n].start_time
+                break
+        n = 0
+        while(eventList[n].end_time < lastMomentInDay) and len(eventList)-1 > n:
+            lastEventTimeInDay = eventList[n].end_time
+            n+=1
 
+        print firstEventTimeInDay
+        print lastEventTimeInDay
+        currentDay = currentDay + datetime.timedelta(hours=24)
         '''        lastMomentInDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 5
         sleepTime = datetime.timedelta(hours=8)
         lastEventTime = 0
@@ -159,7 +171,8 @@ taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(
 taskList.append(Tasks("Get Grocries", 1, eastern.localize(datetime.datetime(2016, 3, 31, hour=17, minute=0, second = 0)), 4))
 taskList.append(Tasks("Nap", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 2))
 taskList.append(Tasks("CS Post Lab", 6, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
+sort_events()
 
-calculate_Priority()
+#calculate_Priority()
 #dueDate = eastern.localize(datetime.datetime(2016, 3, 29, hour=12, minute=0, second = 0))
 #print free_Time_Until(dueDate)
