@@ -54,6 +54,7 @@
 									<td style="padding: 0px;">
 										<div style="width:100%; height: 800px;">
 											{% for event in db.Data %}
+<<<<<<< HEAD
 												<div style="width:100%; top: {{(event.start) * 25}}px; height: {{(event.end-event.start) * 25}}px; position: relative; border: 1px solid #ddd;">
 													<span>{{event.start }} ~ {{event.end }}</span>
 													<span>| {{event.event}}</span>
@@ -61,6 +62,19 @@
 												<div style="width:100%; top: {{(event.end) * 25}}px; height: {{(event.end-event.start) * 25}}px; position: relative; border: 1px solid #ddd;">
 													<span>=========================</span>
 												</div>
+=======
+												{% if event.type %}
+												<div style="width:100%; top: {{(event.start - 7) * 50}}px; height: {{(event.end-event.start) * 50}}px; position: relative; border: 1px solid #ddd; background-color: #FFB3BA">
+												<span>{{event.start % 12}} ~ {{event.end % 12}}</span>
+													<span>| {{event.event}}</span>
+												</div>
+												{% else %}
+												<div style="width:100%; top: {{(event.start - 7) * 50}}px; height: {{(event.end-event.start) * 50}}px; position: relative; border: 1px solid #ddd; background-color: #FFFFBA">
+													<span>{{event.start % 12}} ~ {{event.end % 12}}</span>
+													<span>| {{event.event}}</span>
+												</div>
+												{% endif %}
+>>>>>>> origin/master
 											{% endfor %}
 										</div>
 									</td>
