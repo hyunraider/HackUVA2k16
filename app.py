@@ -90,7 +90,7 @@ def addevent():
 	
 	#this is where you insert it into the db. Remember it is incomplete because its automatically
 	#inserting into the FIRST LAYER OF DB! Which is NOT what we want.
-	db.append({'name': name, 'start': start, 'end': end})
+	dbs.append({'name': name, 'start': start, 'end': end})
 
 	#leave this line to be as it is
 	return json.dumps({'status':'OK','name':name})
@@ -106,7 +106,7 @@ def addassign():
 	
 	#this is where you insert it into the db. Remember it is incomplete because its automatically
 	#inserting into the FIRST LAYER OF DB! Which is NOT what we want.
-	db.append({'name': name, 'start': start, 'end': end, 'priority': priority})
+	dbs.append({'name': name, 'start': start, 'end': end, 'priority': priority})
 
 	#leave this line to be as it is
 	return json.dumps({'status':'OK','name':name})
