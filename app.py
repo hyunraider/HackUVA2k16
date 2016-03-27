@@ -59,6 +59,8 @@ def addevent():
         del dbs[:]
         for a in finalDB:
                 dbs.append(a)
+        index()
+        print finalDB
         #leave this line to be as it is
         return json.dumps({'status':'OK','name':name})
 
@@ -85,7 +87,8 @@ def addassign():
         del dbs[:]
         for a in finalDB:
                 dbs.append(a)
-        print dbs
+        index()
+        print finalDB
         #leave this line to be as it is
         return json.dumps({'status':'OK','name':name})
 

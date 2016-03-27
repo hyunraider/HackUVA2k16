@@ -38,7 +38,7 @@ class FreeTime:
 
 
 for event in cal.walk("vevent"):
-        name = event.get("summary")
+        name = event.get("summary").to_ical()
         startTime = event.get("dtstart").from_ical(event.get("dtstart").to_ical(), "US/Eastern")
         endTime = event.get("dtend").from_ical(event.get("dtend").to_ical(), "US/Eastern")
         eventList.append(Event(name, startTime, endTime, False))
@@ -64,6 +64,7 @@ def sort_tasks():
 
 def add_Sleep():                                                                                            #Adds Blocks of sleep to the start and ends of each day
     sort_events()
+    del eventListDelocalized[:]
     for event in eventList:
         eventListDelocalized.append(Event(event.name, event.start_time.replace(tzinfo=None) + event.start_time.utcoffset(), event.end_time.replace(tzinfo=None) + event.start_time.utcoffset(), event.givenType))
     currentDay = eventListDelocalized[0].start_time
@@ -139,7 +140,6 @@ def prioritize_Time():                                                          
     sort_tasks()                                                                                            #orders the tasks
     #currentDate = datetime.datetime.now(pytz.utc)                                                          #using the current time to calculate delta free time until event
     currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0)) - eventList[0].start_time.utcoffset()              # for testing the week
-    print currentDate
     i = 0
     if len(eventList) > 0 and eventList[0].start_time - currentDate >= datetime.timedelta(minutes=45):      #create an array of free time between events in chronological order accounting for the time
         timeList.append(FreeTime(currentDate, eventList[0].start_time-datetime.timedelta(minutes=15)))      #fifteen minute buffer
@@ -178,17 +178,20 @@ def prioritize_Time():                                                          
 
 def createDB():
     del finalDB[:]
+    del eventListDelocalized[:]
+    for event in eventList:
+        eventListDelocalized.append(Event(event.name, event.start_time.replace(tzinfo=None) + event.start_time.utcoffset(), event.end_time.replace(tzinfo=None) + event.start_time.utcoffset(), event.givenType))
     layerOne = []
-    currentDate = eventList[0].start_time.date()
+    currentDate = eventListDelocalized[0].start_time.date()
     eventIndex = 0
-    while eventIndex < len(eventList)-1:
+    while eventIndex < len(eventListDelocalized)-1:
         layerTwo = {'day': str(currentDate.day), 'Month': currentDate.strftime("%B"), 'Week': currentDate.strftime("%A"), "Data" : []}
-        while eventIndex < len(eventList)-1 and eventList[eventIndex].start_time.date() == currentDate:
-            temp = eventList[eventIndex]
-            layerTwo["Data"].append({"event": temp.name, "start": temp.start_time.hour, "end": temp.end_time.hour, "type": temp.givenType}) #layerTwo["Data"].append({"event": temp.name, "start": temp.start_time.hours + temp.start_time.minutes/60, "end": temp.end_time.hours + temp.end_time.minutes/60, "type": temp.givenType})
+        while eventIndex < len(eventListDelocalized)-1 and eventListDelocalized[eventIndex].start_time.date() == currentDate:
+            temp = eventListDelocalized[eventIndex]
+            layerTwo["Data"].append({"event": temp.name, "start": temp.start_time.hour + temp.start_time.minute/60.0, "end": temp.end_time.hour + temp.end_time.minute/60.0, "type": temp.givenType})
             eventIndex = eventIndex + 1
         layerOne.append(layerTwo)
-        currentDate = eventList[eventIndex].start_time.date()
+        currentDate = eventListDelocalized[eventIndex].start_time.date()
     for a in layerOne:
         finalDB.append(a)
 
