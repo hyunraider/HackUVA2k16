@@ -138,7 +138,6 @@ def calculate_Priority():                                  #creates the float of
         task.calcPriority = (float)(task.priority*task.hoursToComplete/free_Time_Until(task.dueDate))       #multiply by priority and time to complete, divide by time until due
 
 def prioritize_Time():                                                                                      #this creates a list of free time then distrubutes it between the events based on the priority calculated
-    calculate_Priority()                                                                                    #tasks must be in order to run this method
     sort_tasks()                                                                                            #orders the tasks
     #currentDate = datetime.datetime.now(pytz.utc)                                                          #using the current time to calculate delta free time until event
     currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0)) - eventList[0].start_time.utcoffset()              # for testing the week
@@ -147,8 +146,10 @@ def prioritize_Time():                                                          
         if (not event.givenType):
             eventList.remove(event)
     tempTasks = []
+    calculate_Priority()  # tasks must be in order to run this method
     for task in taskList:
         tempTasks.append(task)
+        print task.name
     if len(eventList) > 0 and eventList[0].start_time - currentDate >= datetime.timedelta(minutes=45):      #create an array of free time between events in chronological order accounting for the time
         timeList.append(FreeTime(currentDate, eventList[0].start_time-datetime.timedelta(minutes=15)))      #fifteen minute buffer
     while i < len(eventList) - 2:
@@ -162,9 +163,9 @@ def prioritize_Time():                                                          
         if free.delta <= datetime.timedelta(minutes = 45):                                                  #if there is only a little bit of time
             for task in tempTasks:                                                                           #find a task in the list that
                 if task.hoursToComplete < free.delta.total_seconds()/3600:                                  #takes less time to complete than the free time
-                    task.hoursToComplete = 0                                                                #due to order this will be the highest priority one
+                    task.hoursToComplete = task.hoursToComplete - free.delta.total_seconds()/3600   #due to order this will be the highest priority one
                     eventList.append(Event(task.name, free.start_time, free.end_time, False))               #do that task
-                    task.calcPriority = 0                                                                   #this event is now done
+                    task.calcPriority = (float)(task.priority * task.hoursToComplete / free_Time_Until(task.dueDate))#recalculate the priority of this event                                                                   #this event is now done
                     timeFilled = True                                                                       #to break out of the loop
                     break                                                                                   #onto the next task spot
             if not timeFilled:                                                                              #otherwise there is no small event
@@ -204,26 +205,35 @@ def createDB():
         finalDB.append(a)
 
 def updateAll():
-    for event in eventList:
-        if event.name == "Sleep":
-            eventList.remove(event)
+    for i in range(len(eventList)-1, -1, -1):
+        if eventList[i].name == "Sleep":
+            eventList.remove(eventList[i])
     add_Sleep()
+    calculate_Priority()
+    for t in taskList:
+        print t.name
+        print t.calcPriority
     sort_events()
     prioritize_Time()
     sort_events()
     createDB()
-#
-# taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
-# taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
-# taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=13, minute=0, second = 0)), 6))
-# taskList.append(Tasks("Get Grocries", 1, eastern.localize(datetime.datetime(2016, 3, 31, hour=17, minute=0, second = 0)), 4))
-# taskList.append(Tasks("Nap", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 2))
-# taskList.append(Tasks("CS Post Lab", 10, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
-# taskList.append(Tasks("Copy notes", 1, eastern.localize(datetime.datetime(2016, 3,31, hour=17, minute=0, second = 0)), 9))
-# taskList.append(Tasks("Clean Room", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 5))
-# taskList.append(Tasks("Get Mail", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=12, minute=0, second = 0)), 6))
-# taskList.append(Tasks("Clean Fridge", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 4))
-# taskList.append(Tasks("Physics Lab Report", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=16, minute=0, second = 0)), 5))
-# taskList.append(Tasks("ACM planning", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 7))
-# taskList.append(Tasks("Watch news", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 2))
-# taskList.append(Tasks("Do Laundry", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 3))
+
+taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
+taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
+taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=13, minute=0, second = 0)), 6))
+taskList.append(Tasks("Get Grocries", 1, eastern.localize(datetime.datetime(2016, 3, 31, hour=17, minute=0, second = 0)), 4))
+taskList.append(Tasks("Nap", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 2))
+taskList.append(Tasks("CS Post Lab", 10, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
+taskList.append(Tasks("Copy notes", 1, eastern.localize(datetime.datetime(2016, 3,31, hour=17, minute=0, second = 0)), 9))
+taskList.append(Tasks("Clean Room", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 5))
+taskList.append(Tasks("Get Mail", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=12, minute=0, second = 0)), 6))
+taskList.append(Tasks("Clean Fridge", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 4))
+taskList.append(Tasks("Physics Lab Report", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=16, minute=0, second = 0)), 5))
+taskList.append(Tasks("ACM planning", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 7))
+taskList.append(Tasks("Watch news", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 2))
+taskList.append(Tasks("Do Laundry", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 3))
+
+calculate_Priority()
+for t in taskList:
+    print t.name
+    print t.calcPriority
