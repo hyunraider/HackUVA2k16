@@ -177,6 +177,7 @@ def prioritize_Time():                                                          
 
 
 def createDB():
+    del finalDB[:]
     layerOne = []
     currentDate = eventList[0].start_time.date()
     eventIndex = 0
@@ -184,11 +185,12 @@ def createDB():
         layerTwo = {'day': str(currentDate.day), 'Month': currentDate.strftime("%B"), 'Week': currentDate.strftime("%A"), "Data" : []}
         while eventIndex < len(eventList)-1 and eventList[eventIndex].start_time.date() == currentDate:
             temp = eventList[eventIndex]
-            layerTwo["Data"].append({"event": temp.name, "start": temp.start_time, "end": temp.end_time, "type": temp.givenType})
+            layerTwo["Data"].append({"event": temp.name, "start": temp.start_time.hour, "end": temp.end_time.hour, "type": temp.givenType}) #layerTwo["Data"].append({"event": temp.name, "start": temp.start_time.hours + temp.start_time.minutes/60, "end": temp.end_time.hours + temp.end_time.minutes/60, "type": temp.givenType})
             eventIndex = eventIndex + 1
         layerOne.append(layerTwo)
         currentDate = eventList[eventIndex].start_time.date()
-        finalDB = layerOne
+    for a in layerOne:
+        finalDB.append(a)
 
 def updateAll():
     for event in eventList:
@@ -199,9 +201,6 @@ def updateAll():
     prioritize_Time()
     sort_events()
     createDB()
-    for event in eventList:
-        print event.name
-        print event.start_time
 #
 # taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
 # taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))

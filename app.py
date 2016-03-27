@@ -9,52 +9,7 @@ app = Flask(__name__)
 emptydb = []
 
 #Dummy DB That I've been using so far.
-dbs = [
-        {
-                'day': "21",
-                "Month": "March",
-                "Week": "Monday",
-                "Data": [
-                        {
-                                'event': "CS225",
-                                'start': 8,
-                                'end': 9,
-                                'type': True
-                        },
-                        {
-                                'event': "Math Homework",
-                                'start': 10,
-                                'end': 14,
-                                'type': False
-                        }
-                ]
-        },
-        {
-                'day': "22",
-                "Month": "March",
-                "Week": "Tuesday",
-                "Data": [
-                ]
-        },
-        {
-                'day': "23",
-                "Month": "March",
-                "Week": "Wednesday",
-                "Data": []
-        },
-        {
-                'day': "24",
-                "Month": "March",
-                "Week": "Thursday",
-                "Data": []
-        },
-        {
-                'day': "25",
-                "Month": "March",
-                "Week": "Friday",
-                "Data": []
-        }
-]
+dbs = []
 
 #Just a testing route for in case you want to print out something for testing
 @app.route('/testing')
@@ -92,8 +47,6 @@ def addevent():
         
         #this is where you insert it into the db. Remember it is incomplete because its automatically
         #inserting into the FIRST LAYER OF DB! Which is NOT what we want.
-        dbs.append({'name': name, 'start': start, 'end': end})
-        
         est = timezone("US/Eastern")
         tempEvent = Event(name,
                           est.localize(datetime.datetime(int(start[6:10]), int(start[:2]), int(start[3:5]), int(start[11:13]),int(start[14:16]))),
@@ -102,10 +55,10 @@ def addevent():
         tempEvent.start_time -= tempEvent.start_time.utcoffset()
         tempEvent.end_time -= tempEvent.start_time.utcoffset()
         eventList.append(tempEvent)
-        print "NEW EVENTS"
-        print eventList[len(eventList)-1].name
-        print eventList[len(eventList) - 1].start_time
         updateAll()
+        del dbs[:]
+        for a in finalDB:
+                dbs.append(a)
         #leave this line to be as it is
         return json.dumps({'status':'OK','name':name})
 
@@ -120,7 +73,6 @@ def addassign():
         
         #this is where you insert it into the db. Remember it is incomplete because its automatically
         #inserting into the FIRST LAYER OF DB! Which is NOT what we want.
-
         est = timezone("US/Eastern")
         tempTask = Tasks(name,
                          float(hours),
@@ -130,6 +82,10 @@ def addassign():
         tempTask.dueDate -= tempTask.dueDate.utcoffset()
         taskList.append(tempTask)
         updateAll()
+        del dbs[:]
+        for a in finalDB:
+                dbs.append(a)
+        print dbs
         #leave this line to be as it is
         return json.dumps({'status':'OK','name':name})
 
