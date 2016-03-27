@@ -2,7 +2,7 @@ from icalendar import Calendar
 import datetime
 import pytz
 from pytz import timezone
-from app import dbs
+from app import *
 
 
 
@@ -198,19 +198,8 @@ def updateAll():
             eventList.remove(event)
     add_Sleep()
     sort_events()
-    prioitize_Time()
+    prioritize_Time()
     createDB()
-
-
-
-
-
-
-
-
-
-add_Sleep()
-sort_events()
 
 # for event in eventList:
 #     print event.name
@@ -228,15 +217,5 @@ taskList.append(Tasks("Physics Lab Report", .5, eastern.localize(datetime.dateti
 taskList.append(Tasks("ACM planning", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 7))
 taskList.append(Tasks("Watch news", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 2))
 taskList.append(Tasks("Do Laundry", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 3))
-
-
-calculate_Priority()
-sort_tasks()
-
-prioritize_Time()
-sort_events()
-for event in eventList:
-    print event.name
-
 #dueDate = eastern.localize(datetime.datetime(2016, 3, 29, hour=12, minute=0, second = 0))
 #print free_Time_Until(dueDate)
