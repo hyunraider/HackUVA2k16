@@ -30,7 +30,7 @@ class FreeTime:
     def __init__(self, start, end):
         self.start_time =  start                                                                            #datetime format
         self.end_time = end                                                                                 #datetime format
-        self.delta = start-end                                                                              #deltatime format defied on creation
+        self.delta = end-start                                                                              #deltatime format defied on creation
 
 
 for event in cal.walk("vevent"):
@@ -51,7 +51,7 @@ def sort_events():
 def sort_tasks():
     for i in range(len(taskList) - 1, 0, -1):                                                               # lame bubblesort.py
         for k in range(i):
-            if taskList[k].calcPriority > taskList[k + 1].calcPiority:
+            if taskList[k].calcPriority < taskList[k + 1].calcPriority:
                 temp = taskList[k]                                                                          #swap
                 taskList[k] = taskList[k + 1]
                 taskList[k + 1] = temp                                                                      #taskList now sorted by priority
@@ -77,22 +77,22 @@ def add_Sleep():                                                                
                                                                                                             #If ends after 11, will give 30 minute buffer before putting in sleep
         if lastEventTime.hour * 60 + lastEventTime.minute > 1350:
             if lastEventTime.hour * 60 + lastEventTime.minute < 1410:
-                eventList.append(Event("Sleep", eastern.localize(lastEventTime + datetime.timedelta(minutes=30)), eastern.localize(lastMomentInDay), False))
+                eventList.append(Event("Sleep", eastern.localize(lastEventTime + datetime.timedelta(minutes=30)), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), False))
                 sleepTime = sleepTime - (lastMomentInDay - lastEventTime + datetime.timedelta(minutes=30))
             else:
-                eventList.append(Event("Sleep", eastern.localize(lastEventTime), eastern.localize(lastMomentInDay), False))
+                eventList.append(Event("Sleep", eastern.localize(lastEventTime), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), False))
                 sleepTime = sleepTime - (lastMomentInDay - lastEventTime)
                                                                                                             #Hardcoded Sleep at 11 if time schedule permits
         else:
             goodSleep = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 00)
-            eventList.append(Event("Sleep", eastern.localize(goodSleep), eastern.localize(lastMomentInDay), False))
+            eventList.append(Event("Sleep", eastern.localize(goodSleep)- event.start_time.utcoffset(), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), False))
             sleepTime = sleepTime - (lastMomentInDay - goodSleep)
 
         firstMomentNextDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 00, 00)+datetime.timedelta(days=1)
         if firstMomentNextDay + sleepTime < eventListDelocalized[nextDayIndex].start_time - datetime.timedelta(minutes=30):             #Add variable for prep time in the morening rather than hardcode 30 min
-            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay), eastern.localize(firstMomentNextDay + sleepTime), False))
+            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), eastern.localize(firstMomentNextDay + sleepTime)- event.start_time.utcoffset(), False))
         else:
-            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay), eastern.localize(eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)),False))
+            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), eastern.localize(eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)),False))
 
         currentDay = currentDay + datetime.timedelta(days=1)
 
@@ -101,7 +101,7 @@ def add_Sleep():                                                                
 
 def free_Time_Until(dueDate):
     #currentDate = datetime.datetime.now(pytz.utc) #using the current time to calculate delta free time until event
-    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=0, minute=0, second=0))# for testing the week
+    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0))# for testing the week
     totalTime =  dueDate - currentDate                                                                      #start assuming all time until due date is availible
     i = 0
     if len(eventList) > 0 and eventList[0].start_time - currentDate > datetime.timedelta(minutes=45):       #if there is more than 15 minutes before the first event
@@ -129,37 +129,63 @@ def free_Time_Until(dueDate):
 def calculate_Priority():                                  #creates the float of the priority for ordering events, based on Priority*hoursToDo/FreeTime
     for task in taskList:
         task.calcPriority = (float)(task.priority*task.hoursToComplete/free_Time_Until(task.dueDate))       #multiply by priority and time to complete, divide by time until due
-        print task.name#prints for debugging
-        print task.priority
-        print task.hoursToComplete
-        print free_Time_Until(task.dueDate)
-        print task.calcPriority
 
 def prioritize_Time():                                                                                      #this creates a list of free time then distrubutes it between the events based on the priority calculated
     calculate_Priority()                                                                                    #tasks must be in order to run this method
+    sort_tasks()                                                                                            #orders the tasks
     #currentDate = datetime.datetime.now(pytz.utc)                                                          #using the current time to calculate delta free time until event
-    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=0, minute=0, second=0))              # for testing the week
+    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=0, minute=0, second=0) + eventList[0].start_time.utcoffset())              # for testing the week
     i = 0
-    if len(eventList) > 0 and eventList[0].start_time - currentDate > datetime.timedelta(minutes=45):       #create an array of free time between events in chronological order accounting for the time
+    if len(eventList) > 0 and eventList[0].start_time - currentDate >= datetime.timedelta(minutes=45):       #create an array of free time between events in chronological order accounting for the time
         timeList.append(FreeTime(currentDate, eventList[0].start_time-datetime.timedelta(minutes=15)))      #fifteen minute buffer
     while i < len(eventList) - 2:
         if eventList[i+1].start_time - eventList[i].end_time >= datetime.timedelta(minutes=60):             #by definition no free time blocks under 30 minutes
             timeList.append(FreeTime(eventList[i].end_time + datetime.timedelta(minutes=15), eventList[i+1].start_time - datetime.timedelta(minutes=15)))#fifteen minute buffer to account for travel
-    for task in taskList:                                                                                   #for each task add it to the next time slot until it is done
-        task
+        i+=1
+    for free in timeList:                                                                                   #for each task add it to the next time slot until it is done
+        timeFilled = False
+        if free.delta <= datetime.timedelta(minutes = 45):
+            for task in taskList:
+                if task.hoursToComplete < free.delta.total_seconds()/3600:
+                    task.hoursToComplete = 0
+                    eventList.append(Event(task.name, free.start_time, free.end_time, False))
+                    task.calcPriority = (float)(task.priority*task.hoursToComplete/free_Time_Until(task.dueDate))
+                    timeFilled = True
+                    break
+            if not timeFilled:
+                eventList.append(Event(taskList[0].name, free.start_time, free.end_time, False))
+                taskList[0].hoursToComplete = taskList[0].hoursToComplete - free.delta.total_seconds()/3600
+                taskList[0].calcPriority = (float)(taskList[0].priority * taskList[0].hoursToComplete / free_Time_Until(taskList[0].dueDate))
+                timeFilled = True
+        else:
+            timeFilled = False
+            eventList.append(Event(taskList[0].name, free.start_time, free.end_time, False))
+            taskList[0].hoursToComplete = taskList[0].hoursToComplete - free.delta.total_seconds()/3600
+            taskList[0].calcPriority = (float)(taskList[0].priority * taskList[0].hoursToComplete / free_Time_Until(taskList[0].dueDate))
+            timeFilled = True
+        for task in taskList:
+            if task.priority <= 0:
+                taskList.remove(task)
+        sort_tasks()
 
 add_Sleep()
 sort_events()
-for events in eventList:
-    print events.name
 
+# for event in eventList:
+#     print event.name
 taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
 taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
 taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=13, minute=0, second = 0)), 6))
 taskList.append(Tasks("Get Grocries", 1, eastern.localize(datetime.datetime(2016, 3, 31, hour=17, minute=0, second = 0)), 4))
 taskList.append(Tasks("Nap", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 2))
 taskList.append(Tasks("CS Post Lab", 6, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
+calculate_Priority()
+sort_tasks()
 
-#calculate_Priority()
+prioritize_Time()
+sort_events()
+for event in eventList:
+    print event.name
+
 #dueDate = eastern.localize(datetime.datetime(2016, 3, 29, hour=12, minute=0, second = 0))
 #print free_Time_Until(dueDate)
