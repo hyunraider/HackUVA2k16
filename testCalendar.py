@@ -2,9 +2,6 @@ from icalendar import Calendar
 import datetime
 import pytz
 from pytz import timezone
-from app import *
-
-
 
 
 
@@ -16,6 +13,7 @@ eventList = []
 eventListDelocalized = []
 taskList = []
 timeList = []
+finalDB = []
 
 class Event:
     def __init__(self, name, start, end, boolType):
@@ -72,7 +70,7 @@ def add_Sleep():                                                                
     nextDayIndex = 0
     for i in range(0, 4):
         sleepTime = datetime.timedelta(hours=8)
-        lastEventTime = 0
+        lastEventTime = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 0, 0)
         lastMomentInDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 59)
         for nextDayIndex in range(nextDayIndex, len(eventListDelocalized)-1):
             if eventListDelocalized[nextDayIndex].end_time <= lastMomentInDay:
@@ -183,14 +181,13 @@ def createDB():
     eventIndex = 0
     while eventIndex < len(eventList)-1:
         layerTwo = {'day': str(currentDate.day), 'Month': currentDate.strftime("%B"), 'Week': currentDate.strftime("%A"), "Data" : []}
-        while eventList[eventIndex].start_time.date() == currentDate():
+        while eventList[eventIndex].start_time.date() == currentDate:
             temp = eventList[eventIndex]
             layerTwo["Data"].append({"event": temp.name, "start": temp.start_time, "end": temp.end_time, "type": temp.givenType})
             eventIndex = eventIndex + 1
         layerOne.append(layerTwo)
         currentDate = eventList[eventIndex].start_time.date()
-    app.dbs = layerOne
-
+        finalDB = layerOne
 
 def updateAll():
     for event in eventList:
