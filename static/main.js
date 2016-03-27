@@ -27,7 +27,7 @@ $('#Abutton').click(function(e){
 		e.preventDefault();
 		console.log("starting");
 		var name = $('#AinputName').val();
-		var start = $('#AinputStart').val();
+		var hours = $('#AinputStart').val();
 		var end = $('#AinputEnd').val();
 		var priority = $('#Apriority').val();
 
@@ -35,10 +35,16 @@ $('#Abutton').click(function(e){
 			url: '/addassign',
 			data: {
 				name: name,
-				start: start,
+				hours: hours,
 				end: end,
 				priority: priority
 			},
+//			data: {
+//				name: name,
+//				start: start,
+//				end: end,
+//				priority: priority
+//			},
 			type: 'POST',
 			success: function(response) {
                 console.log(response);

@@ -95,9 +95,16 @@ def addevent():
         dbs.append({'name': name, 'start': start, 'end': end})
         
         est = timezone("US/Eastern")
-        eventList.append(Event(name, est.localize(datetime.datetime(int(start[6:10]), int(start[:2]), int(start[3:5]), int(start[11:13]), int(start[14:16]))),
-                               est.localize(datetime.datetime(int(end[6:10]), int(end[:2]), int(end[3:5]), int(end[11:13]), int(end[14:16]))), True))
-
+        tempEvent = Event(name,
+                          est.localize(datetime.datetime(int(start[6:10]), int(start[:2]), int(start[3:5]), int(start[11:13]),int(start[14:16]))),
+                          est.localize(datetime.datetime(int(end[6:10]), int(end[:2]), int(end[3:5]), int(end[11:13]), int(end[14:16]))),
+                          True)
+        tempEvent.start_time -= tempEvent.start_time.utcoffset()
+        tempEvent.end_time -= tempEvent.start_time.utcoffset()
+        eventList.append(tempEvent)
+        print "NEW EVENTS"
+        print eventList[len(eventList)-1].name
+        print eventList[len(eventList) - 1].start_time
         updateAll()
         #leave this line to be as it is
         return json.dumps({'status':'OK','name':name})
@@ -106,18 +113,22 @@ def addevent():
 @app.route('/addassign', methods=['POST'])
 def addassign():
         name = request.form.get('name')
-        start = request.form.get('start')
         end = request.form.get('end')
+        hours = request.form.get('hours')
         priority = request.form.get('priority')
         #Same thing here as the comments above
         
         #this is where you insert it into the db. Remember it is incomplete because its automatically
         #inserting into the FIRST LAYER OF DB! Which is NOT what we want.
-        dbs.append({'name': name, 'start': start, 'end': end, 'priority': priority})
 
         est = timezone("US/Eastern")
-        eventList.append(Event(name, est.localize(datetime.datetime(int(start[6:10]), int(start[:2]), int(start[3:5]), int(start[11:13]), int(start[14:16]))),
-                               est.localize(datetime.datetime(int(end[6:10]), int(end[:2]), int(end[3:5]), int(end[11:13]), int(end[14:16]))), False))
+        tempTask = Tasks(name,
+                         float(hours),
+                         est.localize(datetime.datetime(int(end[6:10]), int(end[:2]), int(end[3:5]), int(end[11:13]),int(end[14:16]))),
+                         int(priority))
+
+        tempTask.dueDate -= tempTask.dueDate.utcoffset()
+        taskList.append(tempTask)
         updateAll()
         #leave this line to be as it is
         return json.dumps({'status':'OK','name':name})

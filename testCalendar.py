@@ -96,7 +96,7 @@ def add_Sleep():                                                                
         if firstMomentNextDay + sleepTime < eventListDelocalized[nextDayIndex].start_time - datetime.timedelta(minutes=30):             #Add variable for prep time in the morening rather than hardcode 30 min
             eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), eastern.localize(firstMomentNextDay + sleepTime)- event.start_time.utcoffset(), False))
         else:
-            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), eastern.localize(eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)),False))
+            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), (eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)),False))
 
         currentDay = currentDay + datetime.timedelta(days=1)
 
@@ -138,7 +138,8 @@ def prioritize_Time():                                                          
     calculate_Priority()                                                                                    #tasks must be in order to run this method
     sort_tasks()                                                                                            #orders the tasks
     #currentDate = datetime.datetime.now(pytz.utc)                                                          #using the current time to calculate delta free time until event
-    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0) + eventList[0].start_time.utcoffset())              # for testing the week
+    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0)) - eventList[0].start_time.utcoffset()              # for testing the week
+    print currentDate
     i = 0
     if len(eventList) > 0 and eventList[0].start_time - currentDate >= datetime.timedelta(minutes=45):      #create an array of free time between events in chronological order accounting for the time
         timeList.append(FreeTime(currentDate, eventList[0].start_time-datetime.timedelta(minutes=15)))      #fifteen minute buffer
@@ -196,9 +197,11 @@ def updateAll():
     add_Sleep()
     sort_events()
     prioritize_Time()
+    sort_events()
     createDB()
     for event in eventList:
         print event.name
+        print event.start_time
 #
 # taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
 # taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
