@@ -164,8 +164,8 @@ def prioritize_Time():                                                          
             taskList[0].calcPriority = (float)(taskList[0].priority * taskList[0].hoursToComplete / free_Time_Until(taskList[0].dueDate))
             timeFilled = True
         for task in taskList:
-            if task.priority <= 0:
-                taskList.remove(task)
+            if task.priority <= 0.0:
+
         sort_tasks()
 
 add_Sleep()

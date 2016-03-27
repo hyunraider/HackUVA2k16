@@ -45,6 +45,12 @@ dbs = [
 		"Month": "March",
 		"Week": "Thursday",
 		"Data": []
+	},
+	{
+		'day': "25",
+		"Month": "March",
+		"Week": "Friday",
+		"Data": []
 	}
 ]
 
