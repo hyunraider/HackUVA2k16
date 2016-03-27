@@ -41,7 +41,7 @@ for event in cal.walk("vevent"):
         name = event.get("summary").to_ical()
         startTime = event.get("dtstart").from_ical(event.get("dtstart").to_ical(), "US/Eastern")
         endTime = event.get("dtend").from_ical(event.get("dtend").to_ical(), "US/Eastern")
-        eventList.append(Event(name, startTime, endTime, False))
+        eventList.append(Event(name, startTime, endTime, True))
 
 
 def sort_events():
@@ -69,6 +69,8 @@ def add_Sleep():                                                                
         eventListDelocalized.append(Event(event.name, event.start_time.replace(tzinfo=None) + event.start_time.utcoffset(), event.end_time.replace(tzinfo=None) + event.start_time.utcoffset(), event.givenType))
     currentDay = eventListDelocalized[0].start_time
     nextDayIndex = 0
+    #MUST CHANGE THIS LATER IN ODER TO HAVE MODULAR FUNCTION (dont be stupid)
+    eventList.append(Event("Sleep", eastern.localize(datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 00, 00)) - event.start_time.utcoffset(), eastern.localize(datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 7, 00)) - event.start_time.utcoffset(), True))
     for i in range(0, 4):
         sleepTime = datetime.timedelta(hours=8)
         lastEventTime = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 0, 0)
@@ -82,22 +84,22 @@ def add_Sleep():                                                                
                                                                                                             #If ends after 11, will give 30 minute buffer before putting in sleep
         if lastEventTime.hour * 60 + lastEventTime.minute > 1350:
             if lastEventTime.hour * 60 + lastEventTime.minute < 1410:
-                eventList.append(Event("Sleep", eastern.localize(lastEventTime + datetime.timedelta(minutes=30)), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), False))
+                eventList.append(Event("Sleep", eastern.localize(lastEventTime + datetime.timedelta(minutes=30)), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), True))
                 sleepTime = sleepTime - (lastMomentInDay - lastEventTime + datetime.timedelta(minutes=30))
             else:
-                eventList.append(Event("Sleep", eastern.localize(lastEventTime), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), False))
+                eventList.append(Event("Sleep", eastern.localize(lastEventTime), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), True))
                 sleepTime = sleepTime - (lastMomentInDay - lastEventTime)
                                                                                                             #Hardcoded Sleep at 11 if time schedule permits
         else:
             goodSleep = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 00)
-            eventList.append(Event("Sleep", eastern.localize(goodSleep)- event.start_time.utcoffset(), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), False))
+            eventList.append(Event("Sleep", eastern.localize(goodSleep)- event.start_time.utcoffset(), eastern.localize(lastMomentInDay)- event.start_time.utcoffset(), True))
             sleepTime = sleepTime - (lastMomentInDay - goodSleep)
 
         firstMomentNextDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 00, 00)+datetime.timedelta(days=1)
         if firstMomentNextDay + sleepTime < eventListDelocalized[nextDayIndex].start_time - datetime.timedelta(minutes=30):             #Add variable for prep time in the morening rather than hardcode 30 min
-            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), eastern.localize(firstMomentNextDay + sleepTime)- event.start_time.utcoffset(), False))
+            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), eastern.localize(firstMomentNextDay + sleepTime)- event.start_time.utcoffset(), True))
         else:
-            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), (eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)),False))
+            eventList.append(Event("Sleep", eastern.localize(firstMomentNextDay)- event.start_time.utcoffset(), (eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)),True))
 
         currentDay = currentDay + datetime.timedelta(days=1)
 
@@ -141,6 +143,12 @@ def prioritize_Time():                                                          
     #currentDate = datetime.datetime.now(pytz.utc)                                                          #using the current time to calculate delta free time until event
     currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0)) - eventList[0].start_time.utcoffset()              # for testing the week
     i = 0
+    for event in eventList:
+        if (not event.givenType):
+            eventList.remove(event)
+    tempTasks = []
+    for task in taskList:
+        tempTasks.append(task)
     if len(eventList) > 0 and eventList[0].start_time - currentDate >= datetime.timedelta(minutes=45):      #create an array of free time between events in chronological order accounting for the time
         timeList.append(FreeTime(currentDate, eventList[0].start_time-datetime.timedelta(minutes=15)))      #fifteen minute buffer
     while i < len(eventList) - 2:
@@ -149,10 +157,10 @@ def prioritize_Time():                                                          
         i+=1
     for free in timeList:                                                                                   #for each task add it to the next time slot until it is done
         timeFilled = False
-        if len(taskList) == 0:                                                                              #if there are no more tasks to complete
+        if len(tempTasks) == 0:                                                                              #if there are no more tasks to complete
             break
         if free.delta <= datetime.timedelta(minutes = 45):                                                  #if there is only a little bit of time
-            for task in taskList:                                                                           #find a task in the list that
+            for task in tempTasks:                                                                           #find a task in the list that
                 if task.hoursToComplete < free.delta.total_seconds()/3600:                                  #takes less time to complete than the free time
                     task.hoursToComplete = 0                                                                #due to order this will be the highest priority one
                     eventList.append(Event(task.name, free.start_time, free.end_time, False))               #do that task
@@ -160,19 +168,19 @@ def prioritize_Time():                                                          
                     timeFilled = True                                                                       #to break out of the loop
                     break                                                                                   #onto the next task spot
             if not timeFilled:                                                                              #otherwise there is no small event
-                eventList.append(Event(taskList[0].name, free.start_time, free.end_time, False))            #so put that time to a larger event
-                taskList[0].hoursToComplete = taskList[0].hoursToComplete - free.delta.total_seconds()/3600 #subtract that time
-                taskList[0].calcPriority = (float)(taskList[0].priority * taskList[0].hoursToComplete / free_Time_Until(taskList[0].dueDate))#recalculate the priority of this event
+                eventList.append(Event(tempTasks[0].name, free.start_time, free.end_time, False))            #so put that time to a larger event
+                tempTasks[0].hoursToComplete = tempTasks[0].hoursToComplete - free.delta.total_seconds()/3600 #subtract that time
+                tempTasks[0].calcPriority = (float)(tempTasks[0].priority * tempTasks[0].hoursToComplete / free_Time_Until(tempTasks[0].dueDate))#recalculate the priority of this event
                 timeFilled = True
         else:                                                                                               #there is a longer period of time
             timeFilled = False
-            eventList.append(Event(taskList[0].name, free.start_time, free.end_time, False))                #add event to do work during
-            taskList[0].hoursToComplete = taskList[0].hoursToComplete - free.delta.total_seconds()/3600     #reduce tasks to complete
-            taskList[0].calcPriority = (float)(taskList[0].priority * taskList[0].hoursToComplete / free_Time_Until(taskList[0].dueDate))
+            eventList.append(Event(tempTasks[0].name, free.start_time, free.end_time, False))                #add event to do work during
+            tempTasks[0].hoursToComplete = tempTasks[0].hoursToComplete - free.delta.total_seconds()/3600     #reduce tasks to complete
+            tempTasks[0].calcPriority = (float)(tempTasks[0].priority * tempTasks[0].hoursToComplete / free_Time_Until(tempTasks[0].dueDate))
             timeFilled = True                                                                               #in case of multiple cases
-        for task in taskList:                                                                               #delete tasks that are done (if priority = 0 or time to complete = 0)
+        for task in tempTasks:                                                                               #delete tasks that are done (if priority = 0 or time to complete = 0)
             if task.calcPriority <= 0.0 or task.dueDate-currentDate < datetime.timedelta(hours=0):          #if there is no priority (hrs2complete = 0 or priority = 0) or dueDatePasssed
-                taskList.remove(task)                                                                       #remove this event
+                tempTasks.remove(task)                                                                       #remove this event
         sort_tasks()                                                                                        #resort based on removals or priority changes
 
 
