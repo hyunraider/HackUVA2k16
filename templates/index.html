@@ -54,9 +54,14 @@
 									<td style="padding: 0px;">
 										<div style="width:100%; height: 800px;">
 											{% for event in db.Data %}
+<<<<<<< HEAD
 												{% if event.type %}
 												<div style="width:100%; top: {{(event.start - 7) * 50}}px; height: {{(event.end-event.start) * 50}}px; position: relative; border: 1px solid #ddd; background-color: #FFB3BA">
 													<span>{{event.start % 12}} ~ {{event.end % 12}}</span>
+=======
+												<div style="width:100%; top: {{(event.start - 7) * 50}}px; height: {{(event.end-event.start) * 50}}px; position: relative; border: 1px solid #ddd;">
+													<span>{{event.start }} ~ {{event.end }}</span>
+>>>>>>> 101e29bb9e6c3cb50f75ff1ee0e486508be0a02c
 													<span>| {{event.event}}</span>
 												</div>
 												{% else %}
@@ -106,16 +111,16 @@
     			<input type="text" class="form-control" id="AinputName" placeholder="Assignment Name">
       		</div>
       		<div class="form-group">
-      			<label for="AinputStart">Start Time</label>
-    			<input type="text" class="form-control" id="AinputStart" placeholder="MM/DD/YYYY/00:00">
+      			<label for="AinputStart">Hours To Complete</label>
+    			<input type="text" class="form-control" id="AinputStart" placeholder="Number of Hours e.g(1.5)">
       		</div>
       		<div class="form-group">
       			<label for="AinputEnd">End Time</label>
     			<input type="text" class="form-control" id="AinputEnd" placeholder="MM/DD/YYYY/00:00">
       		</div>
       		<div class="form-group">
-      			<label for="Apriority">Priority (1-10)</label>
-    			<input type="number" class="form-control" id="Apriority">
+      			<label for="Apriority">Priority</label>
+    			<input type="number" class="form-control" id="Apriority"  placeholder="On a scale of 1-10">
       		</div>
       		<button type="submit" class="btn btn-default" id="Abutton">Submit</button>
       	</form>
