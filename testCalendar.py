@@ -3,6 +3,13 @@ import datetime
 import pytz
 from pytz import timezone
 eastern = timezone('US/Eastern')
+
+cal = Calendar.from_ical(open("testUVAhackathon.ics").read())
+
+eventList = []
+taskList = []
+timeList = []
+
 class Event:
     def __init__(self, name, start, end, boolType):
         self.name = name                                                                                    #string name
@@ -43,7 +50,7 @@ def sort_events():
 def sort_tasks():
     for i in range(len(taskList) - 1, 0, -1):                                                               # lame bubblesort.py
         for k in range(i):
-            if taskList[k].calcPriority > taskList[k + 1].calcPiority
+            if taskList[k].calcPriority > taskList[k + 1].calcPiority:
                 temp = taskList[k]                                                                          #swap
                 taskList[k] = taskList[k + 1]
                 taskList[k + 1] = temp                                                                      #taskList now sorted by priority
@@ -53,18 +60,24 @@ def add_Sleep():                                                                
     currentDay = eventList[0].start_time
     nextDayIndex = 0
     for i in range(0, 6):
+        lastMomentInDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 5
+
+        '''        lastMomentInDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 5
         sleepTime = datetime.timedelta(hours=8)
-        lastEventTime
+        lastEventTime = 0
         lastMomentInDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 59)
-        for nextDayIndex in range(nextDayIndex, eventList.len-1):
-            if eventList[nextDayIndex].end_time.day == currentDay:
+        for nextDayIndex in range(nextDayIndex, len(eventList)-1):
+            print eventList[nextDayIndex].name
+            print eventList[nextDayIndex].end_time.day - currentDay.day
+
+            if eventList[nextDayIndex].end_time.day <= currentDay.day:
                 lastEventTime = eventList[nextDayIndex].end_time
             else:
                 break
                                                                                                             #Checks how much time is left between last event and midnight
                                                                                                             #If ends after 11, will give 30 minute buffer before putting in sleep
-        if lastEventTime.hour > 10 and lastEventTime.minute > 30:
-            if lastEventTime.hour < 12 and lastEventTime.minute < 30:
+        if lastEventTime.hour > 22 and lastEventTime.minute > 30:
+            if lastEventTime.hour < 23 and lastEventTime.minute < 30:
                 eventList.append(Event("Sleep", lastEventTime + datetime.timedelta(minutes=30), lastMomentInDay, False))
                 sleepTime = sleepTime - (lastMomentInDay - lastEventTime + datetime.timedelta(minutes=30))
             else:
@@ -72,18 +85,23 @@ def add_Sleep():                                                                
                 sleepTime = sleepTime - (lastMomentInDay - lastEventTime)
                                                                                                             #Hardcoded Sleep at 11 if time schedule permits
         else:
-            goodSleep = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 11, 00)
+            goodSleep = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 23, 00)
             eventList.append(Event("Sleep", goodSleep, lastMomentInDay, False))
             sleepTime = sleepTime - (lastMomentInDay - goodSleep)
 
-        firstMomentNextDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day+1, 12, 00)
-        if (firstMomentNextDay + sleepTime < eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)):
+        firstMomentNextDay = eastern.localize(datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 00, 00)+datetime.timedelta(days=1))
+        # print firstMomentNextDay
+        # print firstMomentNextDay.day
+        # print eventList[nextDayIndex].name
+        # print (eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)).tzinfo
+        # print (firstMomentNextDay + sleepTime).tzinfo
+        if firstMomentNextDay + sleepTime < eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30):
             eventList.append(Event("Sleep", firstMomentNextDay, firstMomentNextDay + sleepTime, False))
         else:
-            eventList.append(Event("Sleep", firstMomentNextDay, eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)))
+            eventList.append(Event("Sleep", firstMomentNextDay, eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30),False))
 
         currentDay = currentDay + datetime.timedelta(days=1)
-
+'''
 def free_Time_Until(dueDate):
     #currentDate = datetime.datetime.now(pytz.utc) #using the current time to calculate delta free time until event
     currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=0, minute=0, second=0))# for testing the week
@@ -133,14 +151,7 @@ def prioritize_Time():                                                          
     for task in taskList:                                                                                   #for each task add it to the next time slot until it is done
         task
 
-cal = Calendar.from_ical(open("testUVAhackathon.ics").read())
-
-eventList = []
-taskList = []
-timeList = []
-
-
-sort_events()
+add_Sleep()
 
 taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
 taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
