@@ -92,9 +92,13 @@ def addevent():
 	#this is where you insert it into the db. Remember it is incomplete because its automatically
 	#inserting into the FIRST LAYER OF DB! Which is NOT what we want.
 	dbs.append({'name': name, 'start': start, 'end': end})
+<<<<<<< HEAD
 	est = timezone("US/Eastern")
 	eventList.append(Event(name, est.localize(datetime.datetime(int(start[:4]), int(start[5:7]), int(start[8:10]), int(start[11:13]), int(start[14:16]))),
                                est.localize(datetime.datetime(int(end[:4]), int(end[5:7]), int(end[8:10]), int(end[11:13]), int(end[14:16]))), True)
+=======
+	eventList.append(Event(name, datetime.datetime(int(start[:4])), int(start[5:7]), int(start[9:11])))
+>>>>>>> origin/master
 
         updateAll()
 	#leave this line to be as it is
