@@ -1,7 +1,8 @@
 from icalendar import Calendar
 import datetime
 import pytz
-
+from pytz import timezone
+eastern = timezone('US/Eastern')
 class Event:
     def __init__(self, name, start, end, boolType):
         self.name = name
@@ -23,7 +24,7 @@ class Tasks:
 cal = Calendar.from_ical(open("testUVAhackathon.ics").read())
 
 eventList = []
-taskList = [1, 2, 3]
+taskList = []
 
 for event in cal.walk("vevent"):
         name = event.get("summary")
@@ -42,9 +43,9 @@ def sort_events():
 
 
 def free_Time_Until(dueDate):
-    currentDate = datetime.datetime.now(pytz.utc)
+    #currentDate = datetime.datetime.now(pytz.utc) #using the current time to calculate delta free time until event
+    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=0, minute=0, second=0))# for testing the week
     totalTime =  dueDate - currentDate
-    print totalTime
     i = 0
     if len(eventList) > 1 and eventList[0].start_time - currentDate > datetime.timedelta(minutes=45):
         totalTime = totalTime - datetime.timedelta(minutes=15)
@@ -67,13 +68,27 @@ def free_Time_Until(dueDate):
         i+=1
         if eventList[i].start_time < dueDate and eventList[i].end_time > dueDate:
             totalTime = totalTime - (dueDate - eventList[i].start_time)
-        print totalTime
-    return totalTime #turn this into an int?? calc an int the whole time??
+    return totalTime.total_seconds()/3600 #turn this into an int?? calc an int the whole time??
 
 def calculate_Priority():
     for task in taskList:
-        task.calcPriority = task.hoursToComplete/free_Time_Until(task.dueDate)*task.priority
-
+        #currentDate = pytz.timezone('US/Eastern').localize(datetime(2016, 3, 28, hour=0, minute=0))
+        task.calcPriority = (float)(task.priority*task.hoursToComplete/free_Time_Until(task.dueDate))
+        print task.name
+        print task.priority
+        print task.hoursToComplete
+        print free_Time_Until(task.dueDate)
+        print task.calcPriority
 
 sort_events()
-print free_Time_Until(datetime.datetime.now(pytz.utc)+datetime.timedelta(hours = 60))
+
+taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))
+taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
+taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=13, minute=0, second = 0)), 6))
+taskList.append(Tasks("Get Grocries", 1, eastern.localize(datetime.datetime(2016, 3, 31, hour=17, minute=0, second = 0)), 4))
+taskList.append(Tasks("Nap", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 2))
+taskList.append(Tasks("CS Post Lab", 6, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
+
+calculate_Priority()
+#dueDate = eastern.localize(datetime.datetime(2016, 3, 29, hour=12, minute=0, second = 0))
+#print free_Time_Until(dueDate)

@@ -39,7 +39,7 @@ def sort_events():
                     temp = eventList[k]                                                                     #swap
                     eventList[k] = eventList[k+1]
                     eventList[k+1] = temp                                                                   #eventList are now sorted by start date
-
+                    
 def sort_tasks():
     for i in range(len(taskList) - 1, 0, -1):                                                               # lame bubblesort.py
         for k in range(i):
@@ -48,7 +48,7 @@ def sort_tasks():
                 taskList[k] = taskList[k + 1]
                 taskList[k + 1] = temp                                                                      #taskList now sorted by priority
 
-def add_Sleep():                                                                                            #Adds Blocks of sleep to the start and ends of each day
+def add_Sleep():
     sort_events()
     currentDay = eventList[0].start_time
     nextDayIndex = 0
@@ -61,26 +61,26 @@ def add_Sleep():                                                                
                 lastEventTime = eventList[nextDayIndex].end_time
             else:
                 break
-                                                                                                            #Checks how much time is left between last event and midnight
-                                                                                                            #If ends after 11, will give 30 minute buffer before putting in sleep
+        #Checks how much time is left between last event and midnight
+        #If ends after 11, will give 30 minute buffer before putting in sleep
         if lastEventTime.hour > 10 and lastEventTime.minute > 30:
             if lastEventTime.hour < 12 and lastEventTime.minute < 30:
-                eventList.append(Event("Sleep", lastEventTime + datetime.timedelta(minutes=30), lastMomentInDay, False))
-                sleepTime = sleepTime - (lastMomentInDay - lastEventTime + datetime.timedelta(minutes=30))
+                eventList.append(Event("Sleep", lastEventTime + datetime.timedelta(minutes=30), lastMomentInDay, false))
+                sleepTime = sleeptime - (lastMomentInDay - lastEventTime + datetime.timedelta(minutes=30))
             else:
-                eventList.append(Event("Sleep", lastEventTime, lastMomentInDay, False))
-                sleepTime = sleepTime - (lastMomentInDay - lastEventTime)
-                                                                                                            #Hardcoded Sleep at 11 if time schedule permits
+                eventList.append(Event("Sleep", lastEventTime, lastMomentInDay, false))
+                sleepTime = sleeptime - (lastMomentInDay - lastEventTime)
+        #Hardcoded Sleep at 11 if time schedule permits
         else:
             goodSleep = datetime.datetime(currentDay.year, currentDay.month, currentDay.day, 11, 00)
-            eventList.append(Event("Sleep", goodSleep, lastMomentInDay, False))
-            sleepTime = sleepTime - (lastMomentInDay - goodSleep)
+            eventList.append(Event("Sleep", goodSleep, lastMomentInDay, false))
+            sleepTime = sleeptime - (lastMomentInDay - goodSleep)
 
-        firstMomentNextDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day+1, 12, 00)
-        if (firstMomentNextDay + sleepTime < eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)):
-            eventList.append(Event("Sleep", firstMomentNextDay, firstMomentNextDay + sleepTime, False))
+        firstMomemtNextDay = datetime.datetime(currentDay.year, currentDay.month, currentDay.day+1, 12, 00)
+        if (firstMomentNextDay + sleepTime < eventList[NextDatIndex].start_time - datetime.timedelta(minutes=30)):
+            eventList.append(Event("Sleep", firstMomentNextDay, firstMomentNextDay + sleepTime, false))
         else:
-            eventList.append(Event("Sleep", firstMomentNextDay, eventList[nextDayIndex].start_time - datetime.timedelta(minutes=30)))
+            eventList.append(Event("Sleep", firstMomentNextDay, eventList[NextDatIndex].start_time - datetime.timedelta(minutes=30)))
 
         currentDay = currentDay + datetime.timedelta(days=1)
 
