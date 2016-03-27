@@ -10,4 +10,3 @@ def createDB():
             eventIndex = eventIndex + 1
         layerOne.append(layerTwo)
         currentDate = eventList[eventIndex].start_time.date()
-    return layerOne

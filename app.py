@@ -1,4 +1,5 @@
 from flask import Flask, url_for, render_template, jsonify, request, json
+from testCalendar import *
 
 
 app = Flask(__name__)
@@ -91,6 +92,7 @@ def addevent():
 	#this is where you insert it into the db. Remember it is incomplete because its automatically
 	#inserting into the FIRST LAYER OF DB! Which is NOT what we want.
 	dbs.append({'name': name, 'start': start, 'end': end})
+	eventList.append(Event(name, datetime.datetime(int(start[:4]), int(start[5:7], int(start[9:11])
 
 	#leave this line to be as it is
 	return json.dumps({'status':'OK','name':name})

@@ -2,6 +2,12 @@ from icalendar import Calendar
 import datetime
 import pytz
 from pytz import timezone
+from app import dbs
+
+
+
+
+
 eastern = timezone('US/Eastern')
 
 cal = Calendar.from_ical(open("testUVAhackathon.ics").read())
@@ -169,6 +175,39 @@ def prioritize_Time():                                                          
             if task.calcPriority <= 0.0 or task.dueDate-currentDate < datetime.timedelta(hours=0):          #if there is no priority (hrs2complete = 0 or priority = 0) or dueDatePasssed
                 taskList.remove(task)                                                                       #remove this event
         sort_tasks()                                                                                        #resort based on removals or priority changes
+
+
+def createDB():
+    layerOne = []
+    currentDate = eventList[0].start_time.date()
+    eventIndex = 0
+    while eventIndex < len(eventList)-1:
+        layerTwo = {'day': str(currentDate.day), 'Month': currentDate.strftime("%B"), 'Week': currentDate.strftime("%A"), "Data" : []}
+        while eventList[eventIndex].start_time.date() == currentDate():
+            temp = eventList[eventIndex]
+            layerTwo["Data"].append({"event": temp.name, "start": temp.start_time, "end": temp.end_time, "type": temp.givenType})
+            eventIndex = eventIndex + 1
+        layerOne.append(layerTwo)
+        currentDate = eventList[eventIndex].start_time.date()
+    app.dbs = layerOne
+
+
+def updateAll():
+    for event in eventList:
+        if event.name == "Sleep":
+            eventList.remove(event)
+    add_Sleep()
+    sort_events()
+    prioitize_Time()
+    createDB()
+
+
+
+
+
+
+
+
 
 add_Sleep()
 sort_events()
