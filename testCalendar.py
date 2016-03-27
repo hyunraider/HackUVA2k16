@@ -101,7 +101,7 @@ def add_Sleep():                                                                
 
 def free_Time_Until(dueDate):
     #currentDate = datetime.datetime.now(pytz.utc) #using the current time to calculate delta free time until event
-    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0))# for testing the week
+    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0))              # for testing the week
     totalTime =  dueDate - currentDate                                                                      #start assuming all time until due date is availible
     i = 0
     if len(eventList) > 0 and eventList[0].start_time - currentDate > datetime.timedelta(minutes=45):       #if there is more than 15 minutes before the first event
@@ -134,9 +134,9 @@ def prioritize_Time():                                                          
     calculate_Priority()                                                                                    #tasks must be in order to run this method
     sort_tasks()                                                                                            #orders the tasks
     #currentDate = datetime.datetime.now(pytz.utc)                                                          #using the current time to calculate delta free time until event
-    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=0, minute=0, second=0) + eventList[0].start_time.utcoffset())              # for testing the week
+    currentDate = eastern.localize(datetime.datetime(2016, 3, 28, hour=8, minute=0, second=0) + eventList[0].start_time.utcoffset())              # for testing the week
     i = 0
-    if len(eventList) > 0 and eventList[0].start_time - currentDate >= datetime.timedelta(minutes=45):       #create an array of free time between events in chronological order accounting for the time
+    if len(eventList) > 0 and eventList[0].start_time - currentDate >= datetime.timedelta(minutes=45):      #create an array of free time between events in chronological order accounting for the time
         timeList.append(FreeTime(currentDate, eventList[0].start_time-datetime.timedelta(minutes=15)))      #fifteen minute buffer
     while i < len(eventList) - 2:
         if eventList[i+1].start_time - eventList[i].end_time >= datetime.timedelta(minutes=60):             #by definition no free time blocks under 30 minutes
@@ -144,29 +144,31 @@ def prioritize_Time():                                                          
         i+=1
     for free in timeList:                                                                                   #for each task add it to the next time slot until it is done
         timeFilled = False
-        if free.delta <= datetime.timedelta(minutes = 45):
-            for task in taskList:
-                if task.hoursToComplete < free.delta.total_seconds()/3600:
-                    task.hoursToComplete = 0
-                    eventList.append(Event(task.name, free.start_time, free.end_time, False))
-                    task.calcPriority = (float)(task.priority*task.hoursToComplete/free_Time_Until(task.dueDate))
-                    timeFilled = True
-                    break
-            if not timeFilled:
-                eventList.append(Event(taskList[0].name, free.start_time, free.end_time, False))
-                taskList[0].hoursToComplete = taskList[0].hoursToComplete - free.delta.total_seconds()/3600
-                taskList[0].calcPriority = (float)(taskList[0].priority * taskList[0].hoursToComplete / free_Time_Until(taskList[0].dueDate))
+        if len(taskList) == 0:                                                                              #if there are no more tasks to complete
+            break
+        if free.delta <= datetime.timedelta(minutes = 45):                                                  #if there is only a little bit of time
+            for task in taskList:                                                                           #find a task in the list that
+                if task.hoursToComplete < free.delta.total_seconds()/3600:                                  #takes less time to complete than the free time
+                    task.hoursToComplete = 0                                                                #due to order this will be the highest priority one
+                    eventList.append(Event(task.name, free.start_time, free.end_time, False))               #do that task
+                    task.calcPriority = 0                                                                   #this event is now done
+                    timeFilled = True                                                                       #to break out of the loop
+                    break                                                                                   #onto the next task spot
+            if not timeFilled:                                                                              #otherwise there is no small event
+                eventList.append(Event(taskList[0].name, free.start_time, free.end_time, False))            #so put that time to a larger event
+                taskList[0].hoursToComplete = taskList[0].hoursToComplete - free.delta.total_seconds()/3600 #subtract that time
+                taskList[0].calcPriority = (float)(taskList[0].priority * taskList[0].hoursToComplete / free_Time_Until(taskList[0].dueDate))#recalculate the priority of this event
                 timeFilled = True
-        else:
+        else:                                                                                               #there is a longer period of time
             timeFilled = False
-            eventList.append(Event(taskList[0].name, free.start_time, free.end_time, False))
-            taskList[0].hoursToComplete = taskList[0].hoursToComplete - free.delta.total_seconds()/3600
+            eventList.append(Event(taskList[0].name, free.start_time, free.end_time, False))                #add event to do work during
+            taskList[0].hoursToComplete = taskList[0].hoursToComplete - free.delta.total_seconds()/3600     #reduce tasks to complete
             taskList[0].calcPriority = (float)(taskList[0].priority * taskList[0].hoursToComplete / free_Time_Until(taskList[0].dueDate))
-            timeFilled = True
-        for task in taskList:
-            if task.priority <= 0.0:
-
-        sort_tasks()
+            timeFilled = True                                                                               #in case of multiple cases
+        for task in taskList:                                                                               #delete tasks that are done (if priority = 0 or time to complete = 0)
+            if task.calcPriority <= 0.0 or task.dueDate-currentDate < datetime.timedelta(hours=0):          #if there is no priority (hrs2complete = 0 or priority = 0) or dueDatePasssed
+                taskList.remove(task)                                                                       #remove this event
+        sort_tasks()                                                                                        #resort based on removals or priority changes
 
 add_Sleep()
 sort_events()
@@ -178,7 +180,17 @@ taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 
 taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=13, minute=0, second = 0)), 6))
 taskList.append(Tasks("Get Grocries", 1, eastern.localize(datetime.datetime(2016, 3, 31, hour=17, minute=0, second = 0)), 4))
 taskList.append(Tasks("Nap", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 2))
-taskList.append(Tasks("CS Post Lab", 6, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
+taskList.append(Tasks("CS Post Lab", 10, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
+taskList.append(Tasks("Copy notes", 1, eastern.localize(datetime.datetime(2016, 3,31, hour=17, minute=0, second = 0)), 9))
+taskList.append(Tasks("Clean Room", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 5))
+taskList.append(Tasks("Get Mail", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=12, minute=0, second = 0)), 6))
+taskList.append(Tasks("Clean Fridge", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 4))
+taskList.append(Tasks("Physics Lab Report", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=16, minute=0, second = 0)), 5))
+taskList.append(Tasks("ACM planning", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 7))
+taskList.append(Tasks("Watch news", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 2))
+taskList.append(Tasks("Do Laundry", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 3))
+
+
 calculate_Priority()
 sort_tasks()
 
