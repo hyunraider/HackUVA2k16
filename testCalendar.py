@@ -197,18 +197,20 @@ def updateAll():
     sort_events()
     prioritize_Time()
     createDB()
-
-taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
-taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
-taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=13, minute=0, second = 0)), 6))
-taskList.append(Tasks("Get Grocries", 1, eastern.localize(datetime.datetime(2016, 3, 31, hour=17, minute=0, second = 0)), 4))
-taskList.append(Tasks("Nap", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 2))
-taskList.append(Tasks("CS Post Lab", 10, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
-taskList.append(Tasks("Copy notes", 1, eastern.localize(datetime.datetime(2016, 3,31, hour=17, minute=0, second = 0)), 9))
-taskList.append(Tasks("Clean Room", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 5))
-taskList.append(Tasks("Get Mail", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=12, minute=0, second = 0)), 6))
-taskList.append(Tasks("Clean Fridge", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 4))
-taskList.append(Tasks("Physics Lab Report", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=16, minute=0, second = 0)), 5))
-taskList.append(Tasks("ACM planning", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 7))
-taskList.append(Tasks("Watch news", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 2))
-taskList.append(Tasks("Do Laundry", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 3))
+    for event in eventList:
+        print event.name
+#
+# taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
+# taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
+# taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=13, minute=0, second = 0)), 6))
+# taskList.append(Tasks("Get Grocries", 1, eastern.localize(datetime.datetime(2016, 3, 31, hour=17, minute=0, second = 0)), 4))
+# taskList.append(Tasks("Nap", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 2))
+# taskList.append(Tasks("CS Post Lab", 10, eastern.localize(datetime.datetime(2016, 4, 1, hour=12, minute=0, second = 0)), 8))
+# taskList.append(Tasks("Copy notes", 1, eastern.localize(datetime.datetime(2016, 3,31, hour=17, minute=0, second = 0)), 9))
+# taskList.append(Tasks("Clean Room", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 5))
+# taskList.append(Tasks("Get Mail", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=12, minute=0, second = 0)), 6))
+# taskList.append(Tasks("Clean Fridge", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 4))
+# taskList.append(Tasks("Physics Lab Report", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=16, minute=0, second = 0)), 5))
+# taskList.append(Tasks("ACM planning", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 7))
+# taskList.append(Tasks("Watch news", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 2))
+# taskList.append(Tasks("Do Laundry", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 3))
