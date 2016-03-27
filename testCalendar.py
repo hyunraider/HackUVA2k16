@@ -201,8 +201,6 @@ def updateAll():
     prioritize_Time()
     createDB()
 
-# for event in eventList:
-#     print event.name
 taskList.append(Tasks("Fix Laptop", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=21, minute=0, second = 0)), 3))# test tasks for debugging
 taskList.append(Tasks("DLD Studio", 3, eastern.localize(datetime.datetime(2016, 3, 29, hour=13, minute=0, second = 0)), 7))
 taskList.append(Tasks("Physics Pre Lab", .5, eastern.localize(datetime.datetime(2016, 3, 30, hour=13, minute=0, second = 0)), 6))
@@ -217,5 +215,3 @@ taskList.append(Tasks("Physics Lab Report", .5, eastern.localize(datetime.dateti
 taskList.append(Tasks("ACM planning", .5, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 7))
 taskList.append(Tasks("Watch news", 1, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 2))
 taskList.append(Tasks("Do Laundry", 2, eastern.localize(datetime.datetime(2016, 4, 1, hour=23, minute=0, second = 0)), 3))
-#dueDate = eastern.localize(datetime.datetime(2016, 3, 29, hour=12, minute=0, second = 0))
-#print free_Time_Until(dueDate)
